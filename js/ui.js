@@ -77,6 +77,11 @@ function showAdmin() {
   homeView.classList.add("hidden");
   cameraView.classList.add("hidden");
   adminTab.classList.remove("hidden");
+  // Hiển thị dashboard view mặc định
+  if (typeof showDashboardView === "function") {
+    showDashboardView();
+  }
+  renderProductList();
 }
 
 backBtn.addEventListener("click", async () => {

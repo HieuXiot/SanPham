@@ -80,7 +80,15 @@ async function startPublicScan() {
 
     const product = Object.values(products).find((p) => p.code === decodedText);
     if (product) {
-      publicResult.innerHTML = `<strong>${product.name}</strong><br/>Mã: ${product.code}`;
+      publicResult.innerHTML = `
+        <div style="font-size:15px;line-height:1.6;">
+          <strong>${product.name}</strong><br/>
+          <strong>Giá:</strong> ${product.price || "Chưa có"}<br/>
+          <strong>Danh mục:</strong> ${product.category || "Chưa có"}<br/>
+          <strong>Ghi chú:</strong> ${product.notes || "Không có"}<br/>
+          <strong>Mã:</strong> ${product.code}
+        </div>
+      `;
       toast(`Tìm thấy: ${product.name}`);
     } else {
       publicResult.textContent = `Không tìm thấy sản phẩm với mã "${decodedText}".`;

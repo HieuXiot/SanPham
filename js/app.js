@@ -48,6 +48,9 @@ async function init() {
     // Giờ chỉ suy luận 1 lần mỗi khi bấm "Chụp" nên dùng bản alpha:1 để nhận diện chính xác hơn.
     mobilenetModel = await mobilenet.load({ version: 1, alpha: 1 });
 
+    loadingText.textContent = "Đang tải dữ liệu cục bộ...";
+    loadDataFromLocalStorage();
+
     if (GITHUB_CONFIGURED) {
       loadingText.textContent = "Đang lấy dữ liệu mới nhất...";
       await pullFromGithub(false);

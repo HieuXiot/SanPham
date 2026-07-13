@@ -24,8 +24,27 @@ function buildDataPayload() {
 }
 
 // Áp 1 payload (đọc từ file hoặc từ GitHub) ngược lại vào state đang chạy
+function normalizeProduct(product) {
+  return {
+    id: product.id,
+    name: product.name || "",
+    code: product.code || "",
+    price: product.price || "",
+    category: product.category || "",
+    notes: product.notes || "",
+    status: product.status || "Thêm",
+    createdAt: product.createdAt || new Date().toISOString(),
+    photoCount: product.photoCount || 0,
+    photos: product.photos || [],
+  };
+}
+
 function applyPayload(payload) {
-  products = payload.products || {};
+  const rawProducts = payload.products || {};
+  products = {};
+  for (const id in rawProducts) {
+    products[id] = normalizeProduct(rawProducts[id]);
+  }
   nextProductId = payload.nextProductId || 1;
   const dataset = {};
   for (const label in payload.classifierDataset || {}) {
@@ -34,6 +53,30 @@ function applyPayload(payload) {
   }
   classifier.setClassifierDataset(dataset);
   renderProductList();
+}
+
+const LOCAL_STORAGE_KEY = "ai-product-scanner-data";
+function saveDataToLocalStorage() {
+  try {
+    const payload = buildDataPayload();
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+  } catch (err) {
+    console.error("Lưu dữ liệu cục bộ thất bại:", err);
+  }
+}
+
+function loadDataFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!raw) return false;
+    const payload = JSON.parse(raw);
+    applyPayload(payload);
+    toast("Đã tải dữ liệu cục bộ.");
+    return true;
+  } catch (err) {
+    console.error("Tải dữ liệu cục bộ thất bại:", err);
+    return false;
+  }
 }
 
 saveDataBtn.addEventListener("click", () => {

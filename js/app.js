@@ -9,7 +9,7 @@ const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "admin123"; // DEMO ONLY - không dùng cho sản phẩm thật
 
 // ====== CẤU HÌNH ĐỒNG BỘ GITHUB ======
-const GITHUB_OWNER = "VietNammm";
+const GITHUB_OWNER = "HieuXiot";
 const GITHUB_REPO = "SanPham";
 const GITHUB_PATH = "data/products.json";
 const GITHUB_BRANCH = "main";

@@ -2,12 +2,24 @@
 // UTILS.JS — HÀM DÙNG CHUNG CHO TOÀN APP
 // ====================================================
 
+// ====== CẤU HÌNH THÔNG BÁO NHANH (TOAST) ======
+// Muốn đổi VỊ TRÍ hiện thông báo: sửa TOAST_GRAVITY ("top"/"bottom")
+// và TOAST_POSITION ("left"/"center"/"right").
+// Muốn đổi THỜI GIAN hiện: sửa TOAST_DURATION_MS (bình thường) và
+// TOAST_DURATION_ERROR_MS (khi báo lỗi) — đơn vị mili-giây (1000 = 1 giây).
+const TOAST_GRAVITY = "top";
+const TOAST_POSITION = "left";
+const TOAST_DURATION_MS = 3000;
+const TOAST_DURATION_ERROR_MS = 5000;
+
 // Hiện toast nhanh góc màn hình
 function toast(text, isError) {
   Toastify({
     text,
+    gravity: TOAST_GRAVITY,
+    position: TOAST_POSITION,
     style: isError ? { background: "#dc2626" } : undefined,
-    duration: isError ? 5000 : 3000,
+    duration: isError ? TOAST_DURATION_ERROR_MS : TOAST_DURATION_MS,
   }).showToast();
 }
 

@@ -9,7 +9,7 @@ const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "admin123"; // DEMO ONLY - không dùng cho sản phẩm thật
 
 // ====== CẤU HÌNH ĐỒNG BỘ GITHUB ======
-const GITHUB_OWNER = "HieuXiot";
+const GITHUB_OWNER = "VietNammm";
 const GITHUB_REPO = "SanPham";
 const GITHUB_PATH = "data/products.json";
 const GITHUB_BRANCH = "main";
@@ -43,8 +43,10 @@ async function init() {
   try {
     classifier = knnClassifier.create();
 
-    loadingText.textContent = "Đang tải model nhận diện (bản nhẹ)...";
-    mobilenetModel = await mobilenet.load({ version: 1, alpha: 0.25 });
+    loadingText.textContent = "Đang tải model nhận diện...";
+    // Trước đây dùng alpha:0.25 (bản siêu nhẹ) để chạy vừa mọi khung hình liên tục.
+    // Giờ chỉ suy luận 1 lần mỗi khi bấm "Chụp" nên dùng bản alpha:1 để nhận diện chính xác hơn.
+    mobilenetModel = await mobilenet.load({ version: 1, alpha: 1 });
 
     if (GITHUB_CONFIGURED) {
       loadingText.textContent = "Đang lấy dữ liệu mới nhất...";

@@ -40,8 +40,22 @@ async function stopAllModes() {
   recognizeLoopRunning = false;
   closeCamera();
   await closeScanner();
+  restoreVideoToDefault();
+  restoreReaderToDefault();
+  if (publicCaptureRow) publicCaptureRow.classList.add("hidden");
+  if (publicScanRetryRow) publicScanRetryRow.classList.add("hidden");
   adminCapturePanel.classList.add("hidden");
   adminScanPanel.classList.add("hidden");
+  if (adminCapturePreview) adminCapturePreview.classList.add("hidden");
+  if (adminScanPreview) adminScanPreview.classList.add("hidden");
+  // Huỷ ảnh/mã đang chờ xác nhận nếu người dùng thoát ngang giữa chừng
+  if (typeof pendingSnapshot !== "undefined" && pendingSnapshot) {
+    pendingSnapshot.tensor.dispose();
+    pendingSnapshot = null;
+  }
+  if (typeof pendingScanCode !== "undefined") {
+    pendingScanCode = null;
+  }
   mode = "idle";
   activeProductId = null;
 }

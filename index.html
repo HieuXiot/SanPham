@@ -97,6 +97,17 @@
       </div>
       <div id="reader" class="hidden"></div>
 
+      <!-- Nút CHỤP để nhận diện (thay cho kiểu quét liên tục từng khung hình cũ) -->
+      <div id="public-capture-row" class="row hidden" style="justify-content:center;">
+        <button id="public-capture-btn">📸 Chụp để nhận diện</button>
+      </div>
+      <canvas id="public-capture-canvas" class="hidden"></canvas>
+
+      <!-- Hiện sau khi quét được 1 mã, tránh quét lặp liên tục gây spam thông báo -->
+      <div id="public-scan-retry-row" class="row hidden" style="justify-content:center;">
+        <button id="public-scan-retry-btn" class="secondary">🔄 Quét mã khác</button>
+      </div>
+
       <div id="public-result"></div>
     </div>
 
@@ -126,20 +137,49 @@
 
       <div id="admin-capture-panel" class="panel hidden">
         <h3 id="admin-capture-title"></h3>
-        <div id="admin-video-wrap">
-          <small>Dùng chung camera phía trên — cuộn lên nếu không thấy hình.</small>
-        </div>
-        <div class="row">
+        <div id="admin-video-wrap"></div>
+
+        <!-- Trạng thái: đã chụp bao nhiêu ảnh -->
+        <p id="admin-capture-status" style="font-size: 13px; color: #6b7280;"></p>
+
+        <div class="row" id="admin-capture-controls">
           <button id="admin-capture-btn"></button>
           <button id="admin-undo-btn" class="secondary">
             ↩️ Hoàn tác ảnh vừa chụp
           </button>
           <button id="admin-capture-close" class="secondary">Đóng</button>
         </div>
+
+        <!-- Xem trước ảnh vừa chụp: xác nhận lưu hoặc chụp lại -->
+        <div id="admin-capture-preview" class="hidden panel">
+          <p style="margin-top:0;font-size:13px;color:#4b5563;">Ảnh vừa chụp:</p>
+          <img id="admin-capture-preview-img" alt="Ảnh vừa chụp" style="width:100%;max-width:280px;border-radius:10px;display:block;margin:0 auto;" />
+          <div class="row">
+            <button id="admin-confirm-btn">✅ Lưu ảnh</button>
+            <button id="admin-retake-btn" class="secondary">🔄 Chụp lại</button>
+          </div>
+        </div>
+
+        <!-- Lưới thumbnail các ảnh đã chụp cho sản phẩm này -->
+        <div id="admin-thumb-grid" class="thumb-grid"></div>
+
+        <canvas id="capture-canvas" class="hidden"></canvas>
       </div>
 
       <div id="admin-scan-panel" class="panel hidden">
         <h3 id="admin-scan-title"></h3>
+        <div id="admin-scan-reader-wrap"></div>
+
+        <!-- Vừa quét được 1 mã: hỏi xác nhận trước khi gán -->
+        <div id="admin-scan-preview" class="hidden panel">
+          <p style="margin-top:0;font-size:13px;color:#4b5563;">Vừa quét được mã:</p>
+          <p id="admin-scan-decoded" style="font-size:18px;font-weight:700;text-align:center;"></p>
+          <div class="row">
+            <button id="admin-scan-confirm-btn">✅ Xác nhận gán mã</button>
+            <button id="admin-scan-retry-btn" class="secondary">🔄 Quét lại</button>
+          </div>
+        </div>
+
         <div class="row">
           <button id="admin-scan-close" class="secondary">Đóng</button>
         </div>

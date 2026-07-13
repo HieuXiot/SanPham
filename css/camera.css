@@ -1,0 +1,77 @@
+/* ===== CAMERA VIEW (nhận diện AI + quét Barcode/QR) ===== */
+#camera-view {
+  padding: 16px;
+}
+#back-btn {
+  margin-bottom: 12px;
+}
+#video-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+#video-wrap video {
+  width: 100%;
+  border-radius: 12px;
+  background: #000;
+}
+#reader {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+#public-result {
+  font-size: 17px;
+  font-weight: 600;
+  min-height: 24px;
+  margin-top: 14px;
+  text-align: center;
+}
+#status-banner {
+  font-size: 13px;
+  color: #6b7280;
+  padding: 0 16px;
+}
+
+/* Khung nhận diện (overlay) + FPS + trạng thái AI — sẵn sàng cho phần
+   nâng cấp UI khung quét vuông, hiển thị FPS, trạng thái model AI */
+.detect-frame {
+  position: absolute;
+  inset: 12%;
+  border: 3px solid #22c55e;
+  border-radius: 12px;
+  pointer-events: none;
+}
+.fps-badge,
+.ai-status-badge {
+  position: absolute;
+  top: 8px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.fps-badge {
+  left: 8px;
+}
+.ai-status-badge {
+  right: 8px;
+}
+
+/* Danh sách đề xuất "Có thể bạn đang muốn" sau khi nhận diện */
+#suggestion-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#suggestion-list .suggestion-item {
+  display: flex;
+  justify-content: space-between;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+}

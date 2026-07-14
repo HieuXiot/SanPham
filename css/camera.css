@@ -38,8 +38,10 @@
 }
 #reader {
   width: 100%;
-  max-width: 320px;
   margin: 0 auto;
+}
+#reader video {
+  border-radius: 12px;
 }
 
 /* Nút chụp: luôn nằm ngay dưới khung camera, to, dễ bấm bằng ngón cái */
@@ -174,6 +176,155 @@
 }
 .ai-status-badge {
   right: 8px;
+}
+
+/* ===== ADMIN — QUÉT QR/BARCODE (khung quét toàn màn hình) =====
+   html5-qrcode tự gán width/height CỐ ĐỊNH BẰNG PX (inline style) cho thẻ
+   <video> ngay lúc mở camera, tính theo kích thước khung tại thời điểm đó.
+   Vì là inline style nên CSS width:100% thường KHÔNG thắng được nó — đây là
+   lý do khung hình bị "đóng băng" nhỏ xíu, đặc biệt là trên điện thoại.
+   Phải dùng !important thì CSS mới ép lại được kích thước theo %. */
+#admin-scan-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: #111827;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+#admin-scan-panel.hidden {
+  display: none !important;
+}
+#admin-scan-title {
+  color: #f9fafb;
+  font-size: 15px;
+  margin: 4px 0 14px;
+  text-align: center;
+}
+#admin-scan-reader-wrap {
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 3 / 4;
+  margin: 0 auto;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+}
+/* Ép mọi div bọc mà thư viện tự tạo bên trong luôn lấp đầy khung */
+#admin-scan-reader-wrap > div,
+#admin-scan-reader-wrap > div > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+#admin-scan-reader-wrap video,
+#admin-scan-reader-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block;
+}
+#admin-scan-panel #admin-scan-preview {
+  max-width: 520px;
+  margin: 14px auto 0;
+  background: #1f2937;
+  border-color: #374151;
+}
+#admin-scan-panel #admin-scan-preview p {
+  color: #f9fafb;
+}
+#admin-scan-panel #admin-scan-decoded {
+  font-size: 20px !important;
+}
+#admin-scan-panel .row {
+  max-width: 520px;
+  width: 100%;
+  margin: 14px auto 0;
+}
+#admin-scan-panel .row button {
+  flex: 1;
+}
+
+/* ===== ADMIN — CHỤP ẢNH SẢN PHẨM (khung camera toàn màn hình) =====
+   Trước đây #admin-video-wrap không có CSS riêng nào — khung camera bị kẹt
+   trong luồng cuộn bình thường của trang Admin nên rất nhỏ, nhất là trên
+   điện thoại. Áp dụng cùng kiểu overlay toàn màn hình như khung quét QR để
+   đồng bộ và luôn to rõ. */
+#admin-capture-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: #111827;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+#admin-capture-panel.hidden {
+  display: none !important;
+}
+#admin-capture-title {
+  color: #f9fafb;
+  font-size: 15px;
+  margin: 4px 0 14px;
+  text-align: center;
+}
+#admin-video-wrap {
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 3 / 4;
+  margin: 0 auto;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+}
+#admin-video-wrap video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block;
+  border-radius: 0;
+}
+#admin-capture-status {
+  max-width: 520px;
+  width: 100%;
+  margin: 10px auto 0 !important;
+  text-align: center;
+  color: #d1d5db !important;
+}
+#admin-capture-controls {
+  max-width: 520px;
+  width: 100%;
+  margin: 12px auto 0;
+}
+#admin-capture-controls button {
+  flex: 1;
+}
+#admin-capture-btn {
+  flex: 2 !important;
+  font-weight: 700;
+}
+#admin-capture-panel #admin-capture-preview {
+  max-width: 520px;
+  margin: 14px auto 0;
+  background: #1f2937;
+  border-color: #374151;
+}
+#admin-capture-panel #admin-capture-preview p {
+  color: #f9fafb !important;
+}
+#admin-capture-panel #admin-thumb-grid {
+  max-width: 520px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Danh sách đề xuất "Có thể bạn đang muốn" sau khi nhận diện */

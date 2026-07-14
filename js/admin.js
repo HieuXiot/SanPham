@@ -296,7 +296,7 @@ function renderProductList() {
   if (searchTerm) {
     entries = entries.filter((product) => {
       const haystack =
-        `${product.name} ${product.code} ${product.category} ${product.notes}`.toLowerCase();
+        `${product.name} ${product.code} ${product.qrCode || ""} ${product.category} ${product.notes}`.toLowerCase();
       return haystack.includes(searchTerm);
     });
   }
@@ -328,6 +328,7 @@ function renderProductList() {
         <div style="margin-top:4px;font-size:13px;color:#374151;">
           ${product.price ? `Giá: ${product.price} • ` : ""}
           ${product.code ? `Mã: ${product.code}` : "Mã: (chưa có)"}
+          ${product.qrCode ? ` • Barcode: ${product.qrCode}` : ""}
         </div>
         <div style="margin-top:4px;font-size:13px;color:#4b5563;">
           ${product.category || "Danh mục: chưa có"} • Ảnh: ${product.photoCount || 0}/${MAX_PHOTOS_PER_PRODUCT}
@@ -461,8 +462,8 @@ function showProductDetail(product) {
   detailStatusLabel.textContent = `Trạng thái: ${product.status}`;
   detailContent.innerHTML = `
     <p><strong>Tên:</strong> ${product.name}</p>
-    <p><strong>Mã:</strong> ${product.code || "(chưa có)"}</p>
-    <p><strong>Barcode:</strong> ${product.code || "(chưa có)"}</p>
+    <p><strong>Mã sản phẩm:</strong> ${product.code || "(chưa có)"}</p>
+    <p><strong>Barcode:</strong> ${product.qrCode || "(chưa có)"}</p>
     <p><strong>Giá:</strong> ${product.price || "(chưa có)"}</p>
     <p><strong>Danh mục:</strong> ${product.category || "(chưa có)"}</p>
     <p><strong>Ghi chú:</strong> ${product.notes || "(không có)"}</p>
@@ -539,7 +540,7 @@ function renderAllProductsInView() {
     html += `
       <tr>
         <td><strong>${product.name}</strong></td>
-        <td>${product.code || "(chưa có)"}</td>
+        <td>Mã: ${product.code || "(chưa có)"}<br>Barcode: ${product.qrCode || "(chưa có)"}</td>
         <td>${product.price || "(chưa có)"}</td>
         <td>${product.category || "(chưa có)"}</td>
         <td>${product.notes || "(không có)"}</td>

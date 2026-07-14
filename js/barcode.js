@@ -32,8 +32,18 @@ async function openScanner(onSuccess) {
 
   const config = {
     fps: 10,
-    // Khung chữ nhật ngang, hợp cả QR (vuông) lẫn mã vạch (dài ngang)
-    qrbox: { width: 280, height: 140 },
+    // Khung quét co giãn theo kích thước khung hình thực tế (thay vì cỡ cố định 280x140px),
+    // giúp camera "thấy" mã rõ hơn và không cần phải dí sát mới quét được.
+    qrbox: (viewfinderWidth, viewfinderHeight) => {
+      const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+      const size = Math.floor(minEdge * 0.9);
+      return { width: size, height: Math.floor(size * 0.65) };
+    },
+    // Ưu tiên dùng BarcodeDetector gốc của trình duyệt (nếu hỗ trợ) — nhanh & nhận mã ở
+    // khoảng cách xa hơn nhiều so với engine JS thuần.
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true,
+    },
   };
 
   // Khai báo rõ các định dạng cần đọc: QR + các loại mã vạch phổ biến trên bao bì
@@ -49,7 +59,28 @@ async function openScanner(onSuccess) {
     ];
   }
 
-  await html5QrCode.start({ facingMode: "environment" }, config, onSuccess);
+  // Xin camera ở độ phân giải cao (Full HD) thay vì mặc định thấp của trình duyệt.
+  // Độ phân giải thấp là nguyên nhân chính khiến phải đưa mã sát camera mới đọc được —
+  // vì mã ở xa chỉ chiếm vài chục pixel, không đủ chi tiết để giải mã.
+  try {
+    await html5QrCode.start(
+      { facingMode: "environment" },
+      {
+        ...config,
+        videoConstraints: {
+          facingMode: "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          advanced: [{ focusMode: "continuous" }],
+        },
+      },
+      onSuccess,
+    );
+  } catch (err) {
+    // Nếu thiết bị không đáp ứng được ràng buộc nâng cao ở trên, thử lại với cấu hình
+    // mặc định để tránh việc quét bị lỗi hoàn toàn trên các máy cũ/yếu.
+    await html5QrCode.start({ facingMode: "environment" }, config, onSuccess);
+  }
 }
 
 async function closeScanner() {
@@ -79,7 +110,9 @@ async function startPublicScan() {
       await html5QrCode.pause(true);
     } catch (e) {}
 
-    const product = Object.values(products).find((p) => p.code === decodedText);
+    const product = Object.values(products).find(
+      (p) => p.qrCode === decodedText || p.code === decodedText,
+    );
     if (product) {
       publicResult.textContent = "";
       if (typeof showResultCard === "function") {
@@ -121,7 +154,7 @@ async function startAdminScan(product) {
   mode = "admin-scan";
   activeProductId = product.id;
   adminScanPanel.classList.remove("hidden");
-  adminScanTitle.textContent = `Quét mã để gán cho: ${product.name}`;
+  adminScanTitle.textContent = `Quét Barcode để gán cho: ${product.name}`;
   adminScanPreview.classList.add("hidden");
   moveReaderTo(adminScanReaderWrap);
   try {
@@ -144,21 +177,23 @@ async function startAdminScan(product) {
 adminScanConfirmBtn.addEventListener("click", async () => {
   const product = products[activeProductId];
   if (!product || !pendingScanCode) return;
-  product.code = pendingScanCode;
+  // Mã quét bằng camera (QR/Barcode) luôn lưu vào product.qrCode,
+  // KHÔNG được ghi đè lên product.code (Mã sản phẩm nhập tay).
+  product.qrCode = pendingScanCode;
   pendingScanCode = null;
 
   // Đồng bộ lại ô input trên form Sửa (nếu đang mở form Sửa của đúng sản phẩm này),
   // tránh việc bấm "Lưu" sau đó ghi đè mất mã vừa quét bằng giá trị cũ trong ô input.
   if (
-    editProductCode &&
+    editProductQrCode &&
     editProductSaveBtn?.dataset.id === product.id
   ) {
-    editProductCode.value = product.code;
+    editProductQrCode.value = product.qrCode;
   }
 
   renderProductList();
   renderDashboard();
-  toast(`Đã gán mã "${product.code}" cho "${product.name}"`);
+  toast(`Đã gán Barcode "${product.qrCode}" cho "${product.name}"`);
   await stopAllModes();
 });
 

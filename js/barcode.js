@@ -79,7 +79,7 @@ async function startPublicScan() {
       await html5QrCode.pause(true);
     } catch (e) {}
 
-    const product = Object.values(products).find((p) => p.code === decodedText);
+    const product = Object.values(products).find((p) => p.qrCode === decodedText);
     if (product) {
       publicResult.textContent = "";
       if (typeof showResultCard === "function") {
@@ -144,21 +144,22 @@ async function startAdminScan(product) {
 adminScanConfirmBtn.addEventListener("click", async () => {
   const product = products[activeProductId];
   if (!product || !pendingScanCode) return;
-  product.code = pendingScanCode;
+  product.qrCode = pendingScanCode;
   pendingScanCode = null;
 
-  // Đồng bộ lại ô input trên form Sửa (nếu đang mở form Sửa của đúng sản phẩm này),
-  // tránh việc bấm "Lưu" sau đó ghi đè mất mã vừa quét bằng giá trị cũ trong ô input.
+  // Đồng bộ lại ô input Barcode trên form Sửa (nếu đang mở form Sửa của đúng
+  // sản phẩm này), tránh việc bấm "Lưu" sau đó ghi đè mất mã vừa quét bằng
+  // giá trị cũ trong ô input.
   if (
-    editProductCode &&
+    editProductQrCode &&
     editProductSaveBtn?.dataset.id === product.id
   ) {
-    editProductCode.value = product.code;
+    editProductQrCode.value = product.qrCode;
   }
 
   renderProductList();
   renderDashboard();
-  toast(`Đã gán mã "${product.code}" cho "${product.name}"`);
+  toast(`Đã gán Barcode "${product.qrCode}" cho "${product.name}"`);
   await stopAllModes();
 });
 

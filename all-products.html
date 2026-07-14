@@ -94,6 +94,7 @@
           id: product.id,
           name: product.name || "",
           code: product.code || "",
+          qrCode: product.qrCode || "",
           price: product.price || "",
           category: product.category || "",
           notes: product.notes || "",
@@ -152,7 +153,7 @@
         if (searchTerm) {
           entries = entries.filter((product) => {
             const haystack =
-              `${product.name} ${product.code} ${product.category} ${product.notes}`.toLowerCase();
+              `${product.name} ${product.code} ${product.qrCode} ${product.category} ${product.notes}`.toLowerCase();
             return haystack.includes(searchTerm);
           });
         }
@@ -176,7 +177,8 @@
             <thead>
               <tr>
                 <th>Tên</th>
-                <th>Mã / Barcode</th>
+                <th>Mã sản phẩm</th>
+                <th>Barcode</th>
                 <th>Giá</th>
                 <th>Danh mục</th>
                 <th>Ghi chú</th>
@@ -192,6 +194,7 @@
                     <tr>
                       <td>${product.name}</td>
                       <td>${product.code || "(chưa có)"}</td>
+                      <td>${product.qrCode || "(chưa có)"}</td>
                       <td>${product.price || "(chưa có)"}</td>
                       <td>${product.category || "(chưa có)"}</td>
                       <td>${product.notes || "(không có)"}</td>

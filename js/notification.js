@@ -67,7 +67,7 @@ function checkProductWarnings(product) {
       "warning",
     );
   }
-  if (!product.code) {
+  if (!product.qrCode) {
     addNotification(`⚠ ${product.name} — Chưa có Barcode`, "warning");
   }
 }

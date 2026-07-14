@@ -79,9 +79,10 @@ if (resultRetakeBtn) {
   resultRetakeBtn.addEventListener("click", () => {
     hideResultCard();
     if (mode === "public-recognize") {
-      publicResult.textContent = "Đưa sản phẩm vào khung hình rồi bấm Chụp";
+      publicResult.textContent = "Đưa sản phẩm vào khung hình rồi bấm nút chụp";
       publicCaptureBtn.disabled = false;
-      publicCaptureBtn.textContent = "📸 Chụp để nhận diện";
+      publicCaptureBtn.classList.remove("shutter-loading");
+      publicCaptureBtn.setAttribute("aria-label", "Chụp để nhận diện");
     } else if (mode === "public-scan" && typeof publicScanRetryBtn !== "undefined") {
       publicScanRetryBtn.click();
     }
@@ -97,11 +98,12 @@ modeRecognizeBtn.addEventListener("click", async () => {
     mode = "public-recognize";
     await openCamera();
     publicCaptureBtn.disabled = false;
-    publicCaptureBtn.textContent = "📸 Chụp để nhận diện";
+    publicCaptureBtn.classList.remove("shutter-loading");
+    publicCaptureBtn.setAttribute("aria-label", "Chụp để nhận diện");
     publicCaptureRow.classList.remove("hidden");
     publicResult.textContent =
       classifier.getNumClasses() > 0
-        ? "Đưa sản phẩm vào khung hình rồi bấm Chụp"
+        ? "Đưa sản phẩm vào khung hình rồi bấm nút chụp"
         : "Chưa có sản phẩm nào được train trong Admin.";
   } catch (err) {
     publicResult.textContent = "";
@@ -119,7 +121,8 @@ publicCaptureBtn.addEventListener("click", async () => {
   }
 
   publicCaptureBtn.disabled = true;
-  publicCaptureBtn.textContent = "⏳ Đang nhận diện...";
+  publicCaptureBtn.classList.add("shutter-loading");
+  publicCaptureBtn.setAttribute("aria-label", "Đang nhận diện...");
   publicResult.textContent = "Đang phân tích ảnh vừa chụp...";
   hideResultCard();
 
@@ -156,7 +159,8 @@ publicCaptureBtn.addEventListener("click", async () => {
     publicResult.textContent = "Có lỗi khi nhận diện, hãy thử chụp lại.";
   } finally {
     publicCaptureBtn.disabled = false;
-    publicCaptureBtn.textContent = "📸 Chụp lại";
+    publicCaptureBtn.classList.remove("shutter-loading");
+    publicCaptureBtn.setAttribute("aria-label", "Chụp lại");
   }
 });
 

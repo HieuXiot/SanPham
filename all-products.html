@@ -112,27 +112,33 @@
       }
 
       async function loadProducts() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (raw) {
-            const payload = JSON.parse(raw);
-            applyPayload(payload);
-            renderAllProducts();
-            return;
-          }
-        } catch (err) {
-          console.error(err);
-        }
-
+        // Luôn thử lấy bản MỚI NHẤT từ GitHub trước tiên, vì đây mới là
+        // nguồn dữ liệu "thật" (admin push lên từ index.html). Trước đây
+        // code ưu tiên đọc localStorage trước và return ngay nếu có sẵn
+        // (kể cả bản rỗng/cũ), khiến trang này mãi mãi không thấy dữ liệu
+        // mới dù đã đồng bộ thành công ở nơi khác.
         try {
           const res = await fetch(
             "https://raw.githubusercontent.com/HieuXiot/SanPham/main/data/products.json?t=" +
               Date.now(),
           );
-          if (!res.ok) return;
-          const payload = await res.json();
-          applyPayload(payload);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+          if (res.ok) {
+            const payload = await res.json();
+            applyPayload(payload);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+            renderAllProducts();
+            return;
+          }
+        } catch (err) {
+          console.error("Không lấy được dữ liệu từ GitHub, thử dùng bản lưu cục bộ:", err);
+        }
+
+        // Chỉ dùng localStorage khi GitHub không tải được (vd: mất mạng)
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            applyPayload(JSON.parse(raw));
+          }
         } catch (err) {
           console.error(err);
         }

@@ -39,6 +39,30 @@ const statusBanner = document.querySelector("#status-banner");
 // ====================================================
 // KHỞI ĐỘNG: MÀN HÌNH LOADING -> TẢI MODEL -> HIỆN APP
 // ====================================================
+// Tải mobilenet có thử lại (retry) vì host model mặc định của thư viện
+// (storage.googleapis.com -> redirect sang link ký sẵn trên Kaggle) thỉnh
+// thoảng bị đóng kết nối giữa chừng (ERR_CONNECTION_CLOSED), không phải lỗi
+// từ code của app. Thử lại vài lần với độ trễ tăng dần thường sẽ qua được.
+async function loadMobilenetWithRetry(config, maxAttempts = 4) {
+  let lastErr;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      if (attempt > 1) {
+        loadingText.textContent = `Đang tải model nhận diện... (thử lại lần ${attempt}/${maxAttempts})`;
+      }
+      return await mobilenet.load(config);
+    } catch (err) {
+      lastErr = err;
+      console.warn(`Tải mobilenet thất bại (lần ${attempt}/${maxAttempts}):`, err);
+      if (attempt < maxAttempts) {
+        // Chờ tăng dần: 1s, 2s, 4s... để tránh spam ngay lúc mạng/host đang lỗi
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** (attempt - 1)));
+      }
+    }
+  }
+  throw lastErr;
+}
+
 async function init() {
   try {
     classifier = knnClassifier.create();
@@ -46,7 +70,16 @@ async function init() {
     loadingText.textContent = "Đang tải model nhận diện...";
     // Trước đây dùng alpha:0.25 (bản siêu nhẹ) để chạy vừa mọi khung hình liên tục.
     // Giờ chỉ suy luận 1 lần mỗi khi bấm "Chụp" nên dùng bản alpha:1 để nhận diện chính xác hơn.
-    mobilenetModel = await mobilenet.load({ version: 1, alpha: 1 });
+    try {
+      mobilenetModel = await loadMobilenetWithRetry({ version: 1, alpha: 1 });
+    } catch (err) {
+      // Host model chính (qua Kaggle) vẫn lỗi sau nhiều lần thử -> thử bản
+      // alpha nhỏ hơn, vì nó được lưu ở một model id/host khác trên Kaggle
+      // nên có thể không gặp cùng sự cố.
+      console.warn("Không tải được mobilenet alpha:1, thử alpha:0.75...", err);
+      loadingText.textContent = "Model chính đang lỗi, đang thử bản dự phòng...";
+      mobilenetModel = await loadMobilenetWithRetry({ version: 1, alpha: 0.75 });
+    }
 
     loadingText.textContent = "Đang tải dữ liệu cục bộ...";
     loadDataFromLocalStorage();
@@ -56,12 +89,18 @@ async function init() {
       await pullFromGithub(false);
     }
 
+    // Render (và lưu lại) SAU khi dữ liệu thật (local hoặc GitHub) đã nạp
+    // xong — không được gọi sớm hơn, nếu không sẽ vô tình lưu đè một bản
+    // dữ liệu rỗng vào localStorage/GitHub trước khi kịp tải dữ liệu thật.
+    renderProductList();
+
     loadingScreen.classList.add("hidden");
     modeRecognizeBtn.disabled = false;
   } catch (err) {
     console.error(err);
     loadingText.textContent =
-      "Lỗi khi tải model, kiểm tra kết nối mạng rồi tải lại trang (F5).";
+      "Lỗi khi tải model nhận diện (máy chủ model của Google/Kaggle đang chập chờn). " +
+      "Vui lòng kiểm tra kết nối mạng rồi bấm F5 để tải lại trang. Nếu vẫn lỗi, đợi vài phút rồi thử lại.";
   }
 }
 
@@ -100,7 +139,51 @@ window.addEventListener("appinstalled", () => {
 });
 
 // ====================================================
+// TỰ ĐỘNG ĐỒNG BỘ LẠI KHI: (1) quay lại tab đang mở sẵn,
+// (2) trình duyệt vừa có mạng trở lại — không cần F5.
+// ====================================================
+let isAutoSyncing = false;
+let lastAutoSyncAt = 0;
+const AUTO_SYNC_MIN_INTERVAL_MS = 10000; // tránh gọi dồn dập nhiều lần liên tiếp
+
+async function autoSyncFromGithub(showToast) {
+  if (!GITHUB_CONFIGURED) return;
+  if (isAutoSyncing) return; // đang có 1 lượt đồng bộ chạy rồi, không chạy chồng
+  if (Date.now() - lastAutoSyncAt < AUTO_SYNC_MIN_INTERVAL_MS) return;
+
+  // An toàn: nếu admin đang chụp/train ảnh dở dang thì không tự ý ghi đè
+  // dữ liệu local bằng bản trên GitHub, tránh mất dữ liệu chưa lưu.
+  if (isAdmin && mode !== "idle") return;
+
+  isAutoSyncing = true;
+  lastAutoSyncAt = Date.now();
+  try {
+    if (showToast) toast("Đã có mạng trở lại, đang đồng bộ dữ liệu...");
+    await pullFromGithub(showToast);
+  } finally {
+    isAutoSyncing = false;
+  }
+}
+
+// Quay lại tab/app đang mở sẵn (không load lại trang) -> âm thầm đồng bộ,
+// không cần toast để khỏi làm phiền nếu không có gì mới.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && navigator.onLine) {
+    autoSyncFromGithub(false);
+  }
+});
+
+// Trình duyệt tự phát hiện có mạng trở lại -> đồng bộ ngay + báo cho biết.
+window.addEventListener("online", () => {
+  autoSyncFromGithub(true);
+});
+
+// ====================================================
 // CHẠY HỆ THỐNG (đặt cuối cùng, sau khi mọi module đã tải)
 // ====================================================
+// Lưu ý: KHÔNG gọi renderProductList() ở đây nữa — init() đã tự render
+// sau khi dữ liệu thật được nạp xong (xem cuối hàm init() phía trên).
+// Gọi renderProductList() ngay tại đây (trước khi init() nạp xong dữ liệu)
+// chính là nguyên nhân gây mất dữ liệu: nó render với "products = {}" rỗng
+// ban đầu rồi tự lưu đè bản rỗng đó vào localStorage ngay lập tức.
 init();
-renderProductList();

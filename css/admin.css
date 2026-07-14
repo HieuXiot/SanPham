@@ -123,25 +123,14 @@
   gap: 12px;
 }
 
-#admin-add-view input,
-#admin-edit-view input {
+#admin-add-view input {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
-  width: 100%;
-  min-width: 0;
 }
 
-#admin-add-view .row,
-#admin-edit-view .row {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-#admin-add-view button,
-#admin-edit-view button {
+#admin-add-view button {
   padding: 8px 12px;
   background: #2563eb;
   color: white;
@@ -150,7 +139,6 @@
   font-size: 14px;
   cursor: pointer;
   font-weight: 500;
-  width: 100%;
 }
 
 #admin-add-view button:hover {

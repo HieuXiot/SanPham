@@ -17,7 +17,7 @@ function computeDashboardStats() {
   const notEnoughPhotos = list.filter(
     (p) => (p.photoCount || 0) < MAX_PHOTOS_PER_PRODUCT,
   ).length;
-  const missingBarcode = list.filter((p) => !p.qrCode).length;
+  const missingBarcode = list.filter((p) => !p.code).length;
   return { totalProducts, totalPhotos, notEnoughPhotos, missingBarcode, list };
 }
 
@@ -52,7 +52,7 @@ function renderDashboard() {
     : "<p style='font-size:13px;color:#6b7280;'>Chưa có sản phẩm nào.</p>";
 
   const attentionList = stats.list.filter(
-    (p) => (p.photoCount || 0) < MAX_PHOTOS_PER_PRODUCT || !p.qrCode,
+    (p) => (p.photoCount || 0) < MAX_PHOTOS_PER_PRODUCT || !p.code,
   );
   const attentionHtml = attentionList.length
     ? attentionList
@@ -60,7 +60,7 @@ function renderDashboard() {
           const reasons = [];
           if ((p.photoCount || 0) < MAX_PHOTOS_PER_PRODUCT)
             reasons.push(`mới có ${p.photoCount || 0}/${MAX_PHOTOS_PER_PRODUCT} ảnh`);
-          if (!p.qrCode) reasons.push("chưa có Barcode");
+          if (!p.code) reasons.push("chưa có Barcode");
           return `<li>⚠ <strong>${p.name}</strong> — ${reasons.join(", ")}</li>`;
         })
         .join("")

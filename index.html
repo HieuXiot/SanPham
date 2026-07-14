@@ -90,60 +90,47 @@
     <div id="camera-view" class="hidden">
       <button id="back-btn" class="secondary">⬅ Quay lại</button>
 
-      <div class="camera-stage">
-        <!-- CỤM KẾT QUẢ: bảng thông tin sản phẩm — hiện đầu tiên (trên cùng ở
-             điện thoại) ngay khi có kết quả, nhờ CSS "order" bên dưới -->
-        <div class="camera-side">
-          <div id="public-result-card" class="result-card hidden">
-            <div class="result-card-header">
-              <span id="result-card-badge" class="result-badge"></span>
-            </div>
-            <h3 id="result-card-name"></h3>
-            <div class="result-card-body">
-              <p><strong>Giá:</strong> <span id="result-card-price"></span></p>
-              <p>
-                <strong>Danh mục:</strong>
-                <span id="result-card-category"></span>
-              </p>
-              <p><strong>Ghi chú:</strong> <span id="result-card-notes"></span></p>
-              <p><strong>Mã:</strong> <span id="result-card-code"></span></p>
-            </div>
-            <div class="row" style="justify-content: center">
-              <button id="result-retake-btn" class="secondary">
-                🔄 Không đúng, chụp lại
-              </button>
-            </div>
-          </div>
+      <div id="public-result-card" class="result-card hidden">
+        <div class="result-card-header">
+          <span id="result-card-badge" class="result-badge"></span>
         </div>
+        <h3 id="result-card-name"></h3>
+        <div class="result-card-body">
+          <p><strong>Giá:</strong> <span id="result-card-price"></span></p>
+          <p>
+            <strong>Danh mục:</strong>
+            <span id="result-card-category"></span>
+          </p>
+          <p><strong>Ghi chú:</strong> <span id="result-card-notes"></span></p>
+          <p><strong>Mã:</strong> <span id="result-card-code"></span></p>
+        </div>
+        <div class="row" style="justify-content: center">
+          <button id="result-retake-btn" class="secondary">
+            🔄 Không đúng, chụp lại
+          </button>
+        </div>
+      </div>
 
-        <!-- CỤM CAMERA: khung hình + nút chụp tròn kiểu shutter máy ảnh,
-             đè nhẹ lên đáy khung hình -->
+      <div class="camera-stage">
         <div class="camera-main">
           <div class="camera-frame">
             <div id="video-wrap" class="hidden">
               <video id="video" autoplay muted playsinline></video>
             </div>
             <div id="reader" class="hidden"></div>
-
-            <!-- Nút CHỤP kiểu shutter máy ảnh điện thoại -->
-            <div id="public-capture-row" class="shutter-row hidden">
-              <button
-                id="public-capture-btn"
-                class="shutter-btn"
-                aria-label="Chụp để nhận diện"
-              ></button>
-            </div>
+            <canvas id="public-capture-canvas" class="hidden"></canvas>
           </div>
-          <canvas id="public-capture-canvas" class="hidden"></canvas>
 
-          <!-- Hiện sau khi quét được 1 mã, tránh quét lặp liên tục gây spam thông báo -->
+          <div id="public-capture-row" class="capture-controls hidden">
+            <button id="public-capture-btn" class="shutter-btn">
+              📸 Chụp để nhận diện
+            </button>
+          </div>
           <div id="public-scan-retry-row" class="capture-controls hidden">
             <button id="public-scan-retry-btn" class="secondary">
               🔄 Quét mã khác
             </button>
           </div>
-
-          <!-- Trạng thái dạng chữ (đang mở camera, đang phân tích, chưa có sản phẩm...) -->
           <div id="public-result"></div>
         </div>
       </div>
@@ -270,11 +257,7 @@
           <input type="text" id="new-product-category" placeholder="Danh mục" />
         </div>
         <div class="row">
-          <input
-            type="text"
-            id="new-product-notes"
-            placeholder="Ghi chú"
-          />
+          <input type="text" id="new-product-notes" placeholder="Ghi chú" />
         </div>
         <div class="row">
           <button id="add-product-btn" style="flex: 1">✅ Thêm sản phẩm</button>
@@ -323,11 +306,7 @@
           />
         </div>
         <div class="row">
-          <input
-            type="text"
-            id="edit-product-notes"
-            placeholder="Ghi chú"
-          />
+          <input type="text" id="edit-product-notes" placeholder="Ghi chú" />
         </div>
         <div class="row">
           <button id="edit-product-capture-btn" class="secondary">

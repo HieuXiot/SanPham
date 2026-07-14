@@ -29,7 +29,6 @@ function normalizeProduct(product) {
     id: product.id,
     name: product.name || "",
     code: product.code || "",
-    qrCode: product.qrCode || "",
     price: product.price || "",
     category: product.category || "",
     notes: product.notes || "",

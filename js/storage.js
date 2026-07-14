@@ -54,6 +54,11 @@ function applyPayload(payload) {
   }
   classifier.setClassifierDataset(dataset);
   renderProductList();
+  // renderProductList() ở trên gọi saveDataToLocalStorage(), việc này sẽ tự
+  // bật hasUnsyncedChanges = true. Nhưng dữ liệu vừa nạp là từ GitHub/file
+  // (tức đã "đồng bộ" rồi, không phải thay đổi cục bộ mới) nên phải tắt lại
+  // ngay, nếu không lần tự-đồng-bộ tiếp theo sẽ bị chặn oan.
+  hasUnsyncedChanges = false;
 }
 
 const LOCAL_STORAGE_KEY = "ai-product-scanner-data";
@@ -61,6 +66,7 @@ function saveDataToLocalStorage() {
   try {
     const payload = buildDataPayload();
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+    hasUnsyncedChanges = true;
   } catch (err) {
     console.error("Lưu dữ liệu cục bộ thất bại:", err);
   }

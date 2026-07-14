@@ -19,6 +19,14 @@ async function pullFromGithub(notifyIfEmpty = true) {
     if (notifyIfEmpty) toast("Chưa cấu hình repo GitHub trong js/app.js!", true);
     return;
   }
+  // Nếu admin bấm nút "Tải mới nhất" thủ công nhưng đang có thay đổi cục bộ
+  // chưa đẩy lên GitHub thì hỏi lại trước, tránh bấm nhầm làm mất dữ liệu.
+  if (notifyIfEmpty && isAdmin && hasUnsyncedChanges) {
+    const ok = confirm(
+      "Bạn có thay đổi chưa đồng bộ lên GitHub. Tải bản trên GitHub về sẽ XOÁ MẤT các thay đổi này. Vẫn tiếp tục?",
+    );
+    if (!ok) return;
+  }
   try {
     const res = await fetch(`${githubRawUrl()}?t=${Date.now()}`);
     if (!res.ok) {
@@ -82,6 +90,8 @@ async function pushToGithub() {
       syncStatusEl.textContent =
         "Đã đồng bộ lên GitHub lúc " + new Date().toLocaleTimeString();
       toast("Đồng bộ lên GitHub thành công!");
+      // Dữ liệu cục bộ giờ đã khớp với GitHub -> không còn thay đổi "chưa đồng bộ" nữa.
+      hasUnsyncedChanges = false;
     } else {
       const errData = await putRes.json();
       syncStatusEl.textContent =

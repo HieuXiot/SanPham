@@ -21,6 +21,11 @@ const GITHUB_CONFIGURED =
 let products = {};
 let nextProductId = 1;
 let isAdmin = false;
+// true = có thay đổi cục bộ (thêm/sửa/xoá sản phẩm, train ảnh...) CHƯA được
+// đẩy lên GitHub. Dùng để chặn việc tự động tải (pull) dữ liệu cũ từ GitHub
+// đè mất các thay đổi này trước khi admin kịp bấm "Đồng bộ lên GitHub"
+// (đây chính là nguyên nhân gây mất sạch dữ liệu ở cả local lẫn GitHub).
+let hasUnsyncedChanges = false;
 let mobilenetModel;
 let classifier;
 let html5QrCode;
@@ -138,6 +143,15 @@ window.addEventListener("appinstalled", () => {
   toast("Cài đặt thành công! Mở app từ màn hình chính nhé.");
 });
 
+// Cảnh báo nếu đóng tab / tải lại trang khi admin còn thay đổi chưa đẩy lên
+// GitHub — dữ liệu lúc này chỉ nằm trong localStorage của trình duyệt này.
+window.addEventListener("beforeunload", (e) => {
+  if (isAdmin && hasUnsyncedChanges) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
+
 // ====================================================
 // TỰ ĐỘNG ĐỒNG BỘ LẠI KHI: (1) quay lại tab đang mở sẵn,
 // (2) trình duyệt vừa có mạng trở lại — không cần F5.
@@ -154,6 +168,21 @@ async function autoSyncFromGithub(showToast) {
   // An toàn: nếu admin đang chụp/train ảnh dở dang thì không tự ý ghi đè
   // dữ liệu local bằng bản trên GitHub, tránh mất dữ liệu chưa lưu.
   if (isAdmin && mode !== "idle") return;
+
+  // An toàn (quan trọng): nếu admin vừa thêm/sửa/xoá sản phẩm nhưng CHƯA bấm
+  // "Đồng bộ lên GitHub" thì tuyệt đối không tự tải bản cũ từ GitHub về đè
+  // lên — vì renderProductList() sẽ tự lưu đè bản cũ đó vào localStorage
+  // ngay, xoá mất thay đổi vừa làm trước khi kịp đẩy lên GitHub, rồi lần đẩy
+  // sau sẽ đẩy luôn bản rỗng/cũ đó lên GitHub -> mất dữ liệu ở cả 2 nơi.
+  if (isAdmin && hasUnsyncedChanges) {
+    if (showToast) {
+      toast(
+        "Bạn có thay đổi chưa đồng bộ lên GitHub — hãy bấm ☁️ Đồng bộ lên GitHub trước để không bị mất.",
+        true,
+      );
+    }
+    return;
+  }
 
   isAutoSyncing = true;
   lastAutoSyncAt = Date.now();

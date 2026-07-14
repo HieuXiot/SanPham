@@ -56,6 +56,7 @@ async function stopAllModes() {
   if (typeof pendingScanCode !== "undefined") {
     pendingScanCode = null;
   }
+  if (typeof hideResultCard === "function") hideResultCard();
   mode = "idle";
   activeProductId = null;
 }

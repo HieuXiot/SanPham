@@ -71,6 +71,7 @@ async function closeScanner() {
 async function startPublicScan() {
   mode = "public-scan";
   publicScanRetryRow.classList.add("hidden");
+  if (typeof hideResultCard === "function") hideResultCard();
   await openScanner(async (decodedText) => {
     if (mode !== "public-scan") return; // đã rời màn hình, bỏ qua kết quả trễ
 
@@ -80,18 +81,18 @@ async function startPublicScan() {
 
     const product = Object.values(products).find((p) => p.code === decodedText);
     if (product) {
-      publicResult.innerHTML = `
-        <div style="font-size:15px;line-height:1.6;">
-          <strong>${product.name}</strong><br/>
-          <strong>Giá:</strong> ${product.price || "Chưa có"}<br/>
-          <strong>Danh mục:</strong> ${product.category || "Chưa có"}<br/>
-          <strong>Ghi chú:</strong> ${product.notes || "Không có"}<br/>
-          <strong>Mã:</strong> ${product.code}
-        </div>
-      `;
+      publicResult.textContent = "";
+      if (typeof showResultCard === "function") {
+        showResultCard("found", { name: product.name, product, confidence: 100 });
+      }
       toast(`Tìm thấy: ${product.name}`);
     } else {
-      publicResult.textContent = `Không tìm thấy sản phẩm với mã "${decodedText}".`;
+      publicResult.textContent = "";
+      if (typeof showResultCard === "function") {
+        showResultCard("not-found", { decodedCode: decodedText });
+      } else {
+        publicResult.textContent = `Không tìm thấy sản phẩm với mã "${decodedText}".`;
+      }
     }
     publicScanRetryRow.classList.remove("hidden");
   });
@@ -102,6 +103,7 @@ async function startPublicScan() {
 publicScanRetryBtn.addEventListener("click", async () => {
   if (mode !== "public-scan" || !html5QrCode) return;
   publicScanRetryRow.classList.add("hidden");
+  if (typeof hideResultCard === "function") hideResultCard();
   publicResult.textContent = "Đưa mã vào khung hình để quét...";
   try {
     await html5QrCode.resume();
@@ -144,6 +146,16 @@ adminScanConfirmBtn.addEventListener("click", async () => {
   if (!product || !pendingScanCode) return;
   product.code = pendingScanCode;
   pendingScanCode = null;
+
+  // Đồng bộ lại ô input trên form Sửa (nếu đang mở form Sửa của đúng sản phẩm này),
+  // tránh việc bấm "Lưu" sau đó ghi đè mất mã vừa quét bằng giá trị cũ trong ô input.
+  if (
+    editProductCode &&
+    editProductSaveBtn?.dataset.id === product.id
+  ) {
+    editProductCode.value = product.code;
+  }
+
   renderProductList();
   renderDashboard();
   toast(`Đã gán mã "${product.code}" cho "${product.name}"`);

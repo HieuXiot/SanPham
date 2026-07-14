@@ -34,9 +34,64 @@ const publicCaptureRow = document.querySelector("#public-capture-row");
 const publicCaptureBtn = document.querySelector("#public-capture-btn");
 const publicCaptureCanvas = document.querySelector("#public-capture-canvas");
 
+// Bảng thông tin sản phẩm hiện ra sau khi nhận diện xong
+const publicResultCard = document.querySelector("#public-result-card");
+const resultCardBadge = document.querySelector("#result-card-badge");
+const resultCardName = document.querySelector("#result-card-name");
+const resultCardPrice = document.querySelector("#result-card-price");
+const resultCardCategory = document.querySelector("#result-card-category");
+const resultCardNotes = document.querySelector("#result-card-notes");
+const resultCardCode = document.querySelector("#result-card-code");
+const resultRetakeBtn = document.querySelector("#result-retake-btn");
+
+function hideResultCard() {
+  if (!publicResultCard) return;
+  publicResultCard.classList.add("hidden");
+  publicResultCard.classList.remove("low-confidence", "not-found");
+}
+
+// Đổ dữ liệu 1 sản phẩm ra bảng thông tin. status: "found" | "low" | "not-found"
+function showResultCard(status, { name, product, confidence, decodedCode } = {}) {
+  if (!publicResultCard) return;
+  publicResultCard.classList.remove("hidden", "low-confidence", "not-found");
+
+  if (status === "found") {
+    resultCardBadge.textContent = `✅ Đã nhận diện (${confidence}%)`;
+    resultCardBadge.className = "result-badge";
+  } else if (status === "low") {
+    publicResultCard.classList.add("low-confidence");
+    resultCardBadge.textContent = `🤔 Không chắc chắn (${confidence}%)`;
+    resultCardBadge.className = "result-badge low";
+  } else {
+    publicResultCard.classList.add("not-found");
+    resultCardBadge.textContent = "❌ Không tìm thấy sản phẩm";
+    resultCardBadge.className = "result-badge not-found";
+  }
+
+  resultCardName.textContent = name || "Không xác định";
+  resultCardPrice.textContent = product?.price || "";
+  resultCardCategory.textContent = product?.category || "";
+  resultCardNotes.textContent = product?.notes || "";
+  resultCardCode.textContent = (product?.code || decodedCode) || "";
+}
+
+if (resultRetakeBtn) {
+  resultRetakeBtn.addEventListener("click", () => {
+    hideResultCard();
+    if (mode === "public-recognize") {
+      publicResult.textContent = "Đưa sản phẩm vào khung hình rồi bấm Chụp";
+      publicCaptureBtn.disabled = false;
+      publicCaptureBtn.textContent = "📸 Chụp để nhận diện";
+    } else if (mode === "public-scan" && typeof publicScanRetryBtn !== "undefined") {
+      publicScanRetryBtn.click();
+    }
+  });
+}
+
 modeRecognizeBtn.addEventListener("click", async () => {
   await stopAllModes();
   showCameraView();
+  hideResultCard();
   publicResult.textContent = "Đang mở camera...";
   try {
     mode = "public-recognize";
@@ -66,6 +121,7 @@ publicCaptureBtn.addEventListener("click", async () => {
   publicCaptureBtn.disabled = true;
   publicCaptureBtn.textContent = "⏳ Đang nhận diện...";
   publicResult.textContent = "Đang phân tích ảnh vừa chụp...";
+  hideResultCard();
 
   try {
     // Chụp đúng 1 khung hình hiện tại của video ra canvas
@@ -89,11 +145,12 @@ publicCaptureBtn.addEventListener("click", async () => {
     const product = products[result.label];
     const name = product ? product.name : result.label;
 
-    if (confidence < 55) {
-      publicResult.innerHTML = `🤔 Không chắc chắn lắm (${confidence}%). Có thể là <strong>${name}</strong> — thử chụp lại gần & rõ hơn nhé.`;
-    } else {
-      publicResult.innerHTML = `➡️ <strong>${name}</strong> (${confidence}% chắc chắn)`;
-    }
+    publicResult.textContent = "";
+    showResultCard(confidence < 55 ? "low" : "found", {
+      name,
+      product,
+      confidence,
+    });
   } catch (err) {
     console.error(err);
     publicResult.textContent = "Có lỗi khi nhận diện, hãy thử chụp lại.";

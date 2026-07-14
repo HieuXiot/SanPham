@@ -5,28 +5,147 @@
 #back-btn {
   margin-bottom: 12px;
 }
+
+/* Bố cục tổng: mobile = xếp dọc (camera trên, nút chụp ngay dưới, bảng kết quả
+   dưới cùng). Desktop/tablet ngang = camera bên trái, bảng kết quả bên phải. */
+.camera-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.camera-main {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.camera-side {
+  width: 100%;
+  max-width: 420px;
+}
+
 #video-wrap {
   position: relative;
   width: 100%;
-  max-width: 420px;
   margin: 0 auto;
 }
 #video-wrap video {
   width: 100%;
   border-radius: 12px;
   background: #000;
+  display: block;
 }
 #reader {
   width: 100%;
   max-width: 320px;
   margin: 0 auto;
 }
-#public-result {
-  font-size: 17px;
-  font-weight: 600;
-  min-height: 24px;
+
+/* Nút chụp: luôn nằm ngay dưới khung camera, to, dễ bấm bằng ngón cái */
+.capture-controls {
+  width: 100%;
+  display: flex;
+  justify-content: center;
   margin-top: 14px;
+}
+.shutter-btn {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 14px 30px;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+.shutter-btn:disabled {
+  box-shadow: none;
+}
+
+#public-result {
+  font-size: 15px;
+  font-weight: 600;
+  min-height: 22px;
+  margin-top: 12px;
   text-align: center;
+  color: #4b5563;
+}
+
+/* ===== BẢNG THÔNG TIN SẢN PHẨM sau khi nhận diện / quét mã ===== */
+.result-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  animation: result-pop 0.18s ease-out;
+}
+@keyframes result-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.result-card.low-confidence {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+.result-card.not-found {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+.result-card-header {
+  margin-bottom: 6px;
+}
+.result-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+}
+.result-badge.low {
+  background: #fef3c7;
+  color: #92400e;
+}
+.result-badge.not-found {
+  background: #fee2e2;
+  color: #991b1b;
+}
+#result-card-name {
+  margin: 6px 0 12px;
+  font-size: 19px;
+}
+.result-card-body p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+}
+.result-card-body span:empty::before {
+  content: "Chưa có";
+  color: #9ca3af;
+}
+
+/* ===== TABLET / DESKTOP: camera và bảng kết quả nằm cạnh nhau ===== */
+@media (min-width: 700px) {
+  .camera-stage {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .camera-main,
+  .camera-side {
+    max-width: 380px;
+  }
+  .camera-side {
+    margin-top: 2px;
+  }
 }
 #status-banner {
   font-size: 13px;

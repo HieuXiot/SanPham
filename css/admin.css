@@ -123,11 +123,18 @@
   gap: 12px;
 }
 
-#admin-add-view input {
+#admin-add-view input,
+#admin-edit-view input {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
+  /* Trước đây chỉ ô "Ghi chú" có flex:1 (style inline riêng) nên rộng hơn
+     hẳn các ô còn lại. Đặt width:100% cho MỌI ô ở đây để tất cả rộng bằng
+     nhau, chiếm hết chiều ngang dòng. box-sizing:border-box để padding/border
+     không làm ô bị tràn ra ngoài. */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #admin-add-view button {
